@@ -1,38 +1,63 @@
+import { ShoppingCart, Search, User } from "lucide-react";
+import { SITE } from "../constants/site";
+
 function Navbar() {
   return (
-    <nav className="bg-slate-900 text-white shadow-md">
-      <div className="max-w-7xl mx-auto flex justify-between items-center px-8 py-4">
+    <header className="sticky top-0 z-50 bg-white shadow-md">
+      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
 
-        <h1 className="text-3xl font-bold text-blue-400">
-          🛍 ShopSphere
-        </h1>
+        {/* Logo */}
+        <div>
+          <h1 className="text-3xl font-bold text-blue-600">
+            {SITE.name}
+          </h1>
 
-        <ul className="flex gap-8 text-lg">
+          <p className="text-xs text-gray-500">
+            {SITE.tagline}
+          </p>
+        </div>
 
-          <li className="hover:text-blue-400 cursor-pointer">
-            Home
-          </li>
+        {/* Navigation */}
+        <nav className="hidden lg:flex items-center gap-8">
+          {SITE.navigation.map((item) => (
+            <a
+              key={item}
+              href="#"
+              className="text-gray-700 hover:text-blue-600 font-medium transition duration-300"
+            >
+              {item}
+            </a>
+          ))}
+        </nav>
 
-          <li className="hover:text-blue-400 cursor-pointer">
-            Products
-          </li>
+        {/* Right Side */}
+        <div className="flex items-center gap-4">
 
-          <li className="hover:text-blue-400 cursor-pointer">
-            About
-          </li>
+          <button className="hover:text-blue-600 transition duration-300">
+            <Search size={22} />
+          </button>
 
-          <li className="hover:text-blue-400 cursor-pointer">
-            Contact
-          </li>
+          <button className="relative hover:text-blue-600 transition duration-300">
+            <ShoppingCart size={22} />
 
-        </ul>
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+              0
+            </span>
 
-        <button className="bg-blue-500 hover:bg-blue-600 px-5 py-2 rounded-lg">
-          Login
-        </button>
+          </button>
+
+          <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl transition duration-300">
+
+            <User size={18} />
+
+            Login
+
+          </button>
+
+        </div>
 
       </div>
-    </nav>
+    </header>
   );
 }
 

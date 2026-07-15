@@ -1,37 +1,58 @@
 function Hero() {
   return (
-    <section className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white py-24">
+    <section className="bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 text-white">
 
-      <div className="max-w-7xl mx-auto px-8 text-center">
+      <div className="max-w-7xl mx-auto px-6 py-24">
 
-        <h1 className="text-6xl font-bold mb-6">
-          🛍 ShopSphere
-        </h1>
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
 
-        <p className="text-2xl text-blue-400 mb-4">
-          Modern E-Commerce Platform
-        </p>
+          {/* Left Content */}
 
-        <p className="text-lg text-gray-300 max-w-3xl mx-auto">
-          A Production Ready DevOps Project demonstrating
-          React, Node.js, Docker, Docker Compose,
-          Jenkins, AWS and Nginx deployment.
-        </p>
+          <div>
 
-        <div className="mt-10 flex justify-center gap-6">
+            <span className="inline-block bg-blue-600 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+              Production Ready E-Commerce Platform
+            </span>
 
-          <button className="bg-blue-500 hover:bg-blue-600 px-8 py-3 rounded-lg text-lg font-semibold transition">
-            Browse Products
-          </button>
+            <h1 className="text-5xl lg:text-6xl font-extrabold leading-tight">
+              Smart Shopping.
+              <br />
+              Powered by DevOps.
+            </h1>
 
-          <a
-            href="https://github.com/pgakshatha/shopsphere-devops"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="border border-white px-8 py-3 rounded-lg hover:bg-white hover:text-slate-900 transition"
-          >
-            GitHub Repository
-          </a>
+            <p className="text-lg text-gray-300 mt-8 leading-8">
+              ShopSphere is a modern e-commerce platform built using
+              React, Node.js, PostgreSQL, Docker, and AWS.
+              This project demonstrates production-ready DevOps
+              practices including containerization, CI/CD, cloud deployment,
+              and scalable architecture.
+            </p>
+
+            <div className="flex flex-wrap gap-4 mt-10">
+
+              <button className="bg-blue-600 hover:bg-blue-700 px-8 py-4 rounded-xl font-semibold transition">
+                Shop Now
+              </button>
+
+              <button className="border border-white hover:bg-white hover:text-slate-900 px-8 py-4 rounded-xl font-semibold transition">
+                Learn More
+              </button>
+
+            </div>
+
+          </div>
+
+          {/* Right Content */}
+
+          <div className="flex justify-center">
+
+            <img
+                src="/images/hero.jpg"
+                alt="Technology Workspace"
+                className="rounded-3xl shadow-2xl"
+            />
+
+          </div>
 
         </div>
 

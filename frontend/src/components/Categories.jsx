@@ -1,47 +1,42 @@
 function Categories() {
 
-    const categories = [
-        "Laptops",
-        "Monitors",
-        "Keyboard",
-        "Mouse"
-    ];
+  const categories = [
+    "💻 Laptops",
+    "🖥️ Monitors",
+    "⌨️ Keyboards",
+    "🖱️ Mouse"
+  ];
 
-    return (
+  return (
 
-        <section className="py-10 bg-white">
+    <section className="bg-slate-100 py-16">
 
-            <div className="max-w-7xl mx-auto px-8">
+      <div className="max-w-7xl mx-auto px-8">
 
-                <h2 className="text-3xl font-bold mb-6">
-                    Categories
-                </h2>
+        <h2 className="text-4xl font-bold text-center mb-10">
+          Shop by Category
+        </h2>
 
-                <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap justify-center gap-6">
 
-                    {
-                        categories.map(category => (
+          {categories.map((category) => (
 
-                            <button
-                                key={category}
-                                className="bg-blue-100 hover:bg-blue-500 hover:text-white px-6 py-3 rounded-full transition"
-                            >
+            <button
+              key={category}
+              className="bg-white px-8 py-4 rounded-full shadow hover:bg-blue-600 hover:text-white transition"
+            >
+              {category}
+            </button>
 
-                                {category}
+          ))}
 
-                            </button>
+        </div>
 
-                        ))
-                    }
+      </div>
 
-                </div>
+    </section>
 
-            </div>
-
-        </section>
-
-    );
-
+  );
 }
 
 export default Categories;

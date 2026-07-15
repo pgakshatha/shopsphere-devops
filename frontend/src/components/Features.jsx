@@ -1,52 +1,72 @@
+import { Truck, ShieldCheck, Headphones, BadgeDollarSign } from "lucide-react";
+
 function Features() {
+
+  const features = [
+
+    {
+      icon: <Truck size={40} />,
+      title: "Fast Delivery",
+      desc: "Get products delivered quickly across India."
+    },
+
+    {
+      icon: <ShieldCheck size={40} />,
+      title: "Secure Payment",
+      desc: "100% safe and secure payment gateway."
+    },
+
+    {
+      icon: <BadgeDollarSign size={40} />,
+      title: "Best Prices",
+      desc: "Premium quality products at competitive prices."
+    },
+
+    {
+      icon: <Headphones size={40} />,
+      title: "24/7 Support",
+      desc: "Our support team is available anytime."
+    }
+
+  ];
+
   return (
-    <section className="bg-white py-20">
+
+    <section className="py-20 bg-white">
 
       <div className="max-w-7xl mx-auto px-8">
 
-        <h2 className="text-4xl font-bold text-center mb-12">
-          Why ShopSphere?
-        </h2>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
 
-        <div className="grid md:grid-cols-4 gap-8">
+          {features.map((feature, index) => (
 
-          <div className="text-center">
-            <div className="text-5xl">🚚</div>
-            <h3 className="font-bold mt-4">Fast Delivery</h3>
-            <p className="text-gray-500 mt-2">
-              Quick and secure shipping.
-            </p>
-          </div>
+            <div
+              key={index}
+              className="bg-slate-50 rounded-2xl p-8 text-center shadow hover:shadow-xl transition"
+            >
 
-          <div className="text-center">
-            <div className="text-5xl">🔒</div>
-            <h3 className="font-bold mt-4">Secure Shopping</h3>
-            <p className="text-gray-500 mt-2">
-              Safe online transactions.
-            </p>
-          </div>
+              <div className="text-blue-600 flex justify-center mb-5">
+                {feature.icon}
+              </div>
 
-          <div className="text-center">
-            <div className="text-5xl">☁️</div>
-            <h3 className="font-bold mt-4">AWS Hosted</h3>
-            <p className="text-gray-500 mt-2">
-              Cloud infrastructure ready.
-            </p>
-          </div>
+              <h3 className="text-xl font-bold">
+                {feature.title}
+              </h3>
 
-          <div className="text-center">
-            <div className="text-5xl">🐳</div>
-            <h3 className="font-bold mt-4">Docker Ready</h3>
-            <p className="text-gray-500 mt-2">
-              Containerized deployment.
-            </p>
-          </div>
+              <p className="text-gray-500 mt-3">
+                {feature.desc}
+              </p>
+
+            </div>
+
+          ))}
 
         </div>
 
       </div>
 
     </section>
+
   );
 }
 
