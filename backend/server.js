@@ -1,8 +1,13 @@
 const express = require("express");
+const cors = require("cors");
+
+const productRoutes = require("./routes/productRoutes");
 
 const app = express();
-
 const PORT = 5000;
+
+app.use(cors());
+app.use(express.json());
 
 app.get("/", (req, res) => {
     res.send("Welcome to ShopSphere API");
@@ -16,31 +21,8 @@ app.get("/health", (req, res) => {
     });
 });
 
-app.get("/api/products", (req, res) => {
-    res.json([
-        {
-            id: 1,
-            name: "Laptop",
-            price: 55000
-        },
-        {
-            id: 2,
-            name: "Mouse",
-            price: 800
-        },
-        {
-            id: 3,
-            name: "Keyboard",
-            price: 1200
-        },
-        {
-            id: 4,
-            name: "Monitor",
-            price: 10000
-        }
-    ]);
-});
+app.use("/api/products", productRoutes);
 
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
