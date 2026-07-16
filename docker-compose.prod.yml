@@ -1,81 +1,62 @@
 version: "3.9"
 
 services:
-
   postgres:
     image: postgres:16
     container_name: shopsphere-postgres
     restart: always
-
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: shopsphere
-
     ports:
       - "5432:5432"
-
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
       - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
-
     networks:
       - shopsphere-network
 
   backend:
     image: 051495878977.dkr.ecr.ap-south-1.amazonaws.com/shopsphere:backend-latest
     container_name: shopsphere-backend
-
     restart: always
-
     ports:
       - "5000:5000"
-
     depends_on:
       - postgres
-
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
       DB_NAME: shopsphere
       DB_USER: postgres
       DB_PASSWORD: postgres
-
     networks:
       - shopsphere-network
 
   frontend:
     image: 051495878977.dkr.ecr.ap-south-1.amazonaws.com/shopsphere:frontend-latest
     container_name: shopsphere-frontend
-
     restart: always
-
     ports:
       - "5173:5173"
-
     depends_on:
       - backend
-
     networks:
       - shopsphere-network
 
   nginx:
     image: nginx:latest
     container_name: shopsphere-nginx
-
     restart: always
-
     ports:
       - "80:80"
-
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-
     depends_on:
       - frontend
       - backend
-
     networks:
       - shopsphere-network
 
