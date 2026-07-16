@@ -1,6 +1,6 @@
 # 🚀 Deployment Guide
 
-This document explains how to deploy the **ShopSphere** application in different environments.
+This document explains how to deploy the **ShopSphere** application across development and production environments.
 
 ---
 
@@ -11,8 +11,9 @@ Before deploying the application, ensure the following software is installed:
 - Git
 - Docker
 - Docker Compose
+- AWS CLI
+- Jenkins (for CI)
 - Node.js (Optional for local development)
-- PostgreSQL (Optional if not using Docker)
 
 ---
 
@@ -42,17 +43,12 @@ Example:
 
 ```env
 PORT=5000
-
 NODE_ENV=development
 
 DB_HOST=postgres
-
 DB_PORT=5432
-
 DB_NAME=shopsphere
-
 DB_USER=postgres
-
 DB_PASSWORD=postgres
 ```
 
@@ -76,7 +72,6 @@ VITE_API_URL=http://localhost:5000
 
 ```bash
 cd backend
-
 npm install
 ```
 
@@ -84,15 +79,12 @@ npm install
 
 ```bash
 cd frontend
-
 npm install
 ```
 
 ---
 
-## 4. Start PostgreSQL
-
-If using a local PostgreSQL installation, ensure the database service is running.
+## 4. Initialize PostgreSQL
 
 Create the database:
 
@@ -100,7 +92,7 @@ Create the database:
 CREATE DATABASE shopsphere;
 ```
 
-Run the initialization script:
+Run:
 
 ```bash
 npm run init-db
@@ -108,11 +100,10 @@ npm run init-db
 
 ---
 
-## 5. Start the Backend
+## 5. Run Backend
 
 ```bash
 cd backend
-
 npm run dev
 ```
 
@@ -124,11 +115,10 @@ http://localhost:5000
 
 ---
 
-## 6. Start the Frontend
+## 6. Run Frontend
 
 ```bash
 cd frontend
-
 npm run dev
 ```
 
@@ -142,20 +132,10 @@ http://localhost:5173
 
 # 🐳 Docker Deployment
 
-The recommended way to run the application is using Docker Compose.
-
-## Build and Start Containers
+## Build Containers
 
 ```bash
 docker compose up --build
-```
-
----
-
-## View Running Containers
-
-```bash
-docker ps
 ```
 
 ---
@@ -168,10 +148,70 @@ docker compose down
 
 ---
 
+## View Running Containers
+
+```bash
+docker ps
+```
+
+---
+
 ## Rebuild Containers
 
 ```bash
 docker compose up --build --force-recreate
+```
+
+---
+
+# ☁️ AWS Deployment (Day 06)
+
+The application infrastructure has been prepared for cloud deployment.
+
+Completed:
+
+- AWS EC2 Instance
+- IAM Role Configuration
+- Amazon ECR Repository
+- Docker Installation
+- Docker Compose Installation
+- AWS CLI Installation
+- Jenkins Installation
+
+---
+
+## Build & Push Docker Images
+
+The Jenkins CI pipeline automatically performs:
+
+```text
+Checkout Source Code
+
+↓
+
+Build Backend Image
+
+↓
+
+Build Frontend Image
+
+↓
+
+Tag Docker Images
+
+↓
+
+Push Images to Amazon ECR
+```
+
+Images stored in Amazon ECR:
+
+```
+backend:<BUILD_NUMBER>
+backend:latest
+
+frontend:<BUILD_NUMBER>
+frontend:latest
 ```
 
 ---
@@ -189,80 +229,136 @@ docker compose up --build --force-recreate
 
 # 🔍 Health Check
 
-Verify that the backend is running correctly.
+Backend Health Endpoint
 
 ```
-GET http://localhost:5000/health
+GET /health
 ```
 
-Expected Response
+Example:
 
 ```json
 {
-    "status": "UP",
-    "service": "ShopSphere Backend",
-    "version": "1.0.0"
+  "status": "UP",
+  "service": "ShopSphere Backend",
+  "version": "1.0.0"
 }
 ```
 
 ---
 
-# 📡 Verify API
+# 📡 Products API
 
 ```
-GET http://localhost:5000/api/products
+GET /api/products
 ```
 
-The API should return product data from PostgreSQL.
+Returns all products stored in PostgreSQL.
 
 ---
 
 # 🏗️ Current Deployment Architecture
 
-```
-Browser
-    │
-    ▼
-Nginx
-    │
- ┌──┴───────────────┐
- ▼                  ▼
-React          Express API
+```text
+                 Developer
+                     │
+                 git push
                      │
                      ▼
-              PostgreSQL
+             GitHub Repository
+                     │
+                     ▼
+            Jenkins (AWS EC2)
+                     │
+           Build Docker Images
+                     │
+                     ▼
+        Amazon Elastic Container Registry
 ```
 
 ---
 
-# ☁️ Future Deployment
+# 🚀 Production Deployment (Day 07)
 
-The following production improvements are planned as part of the DevOps challenge:
+The final phase of the project will implement Continuous Deployment.
 
-- AWS EC2 Deployment
-- Jenkins CI/CD Pipeline
-- HTTPS using Nginx
-- Prometheus Monitoring
-- Grafana Dashboard
-- Automated Backup Strategy
-- Centralized Logging
+Deployment workflow:
+
+```text
+GitHub Push
+
+↓
+
+GitHub Webhook
+
+↓
+
+Jenkins
+
+↓
+
+Build Images
+
+↓
+
+Push Images to Amazon ECR
+
+↓
+
+Pull Images on AWS EC2
+
+↓
+
+Docker Compose
+
+↓
+
+Nginx
+
+↓
+
+Application
+```
+
+Production features:
+
+- GitHub Webhooks
+- Continuous Deployment
+- Docker Compose Deployment
+- Health Checks
+- Rollback Strategy
+- Image Versioning
 
 ---
 
 # ✅ Deployment Checklist
 
-- Git Repository Cloned
-- Environment Variables Configured
+## Local
+
+- Repository Cloned
 - Dependencies Installed
 - PostgreSQL Running
-- Docker Containers Running
-- Backend Health Check Passed
-- Frontend Accessible
-- REST API Responding Successfully
+- Backend Running
+- Frontend Running
+
+## Docker
+
+- Docker Installed
+- Docker Compose Installed
+- Containers Running
+
+## AWS
+
+- EC2 Created
+- IAM Role Attached
+- Amazon ECR Created
+- Jenkins Installed
+- Docker Images Built
+- Images Successfully Pushed to Amazon ECR
 
 ---
 
-# 🎯 Deployment Status
+# 📊 Deployment Status
 
 | Environment | Status |
 |-------------|--------|
@@ -270,11 +366,21 @@ The following production improvements are planned as part of the DevOps challeng
 | Docker | ✅ Completed |
 | Docker Compose | ✅ Completed |
 | Production Preparation | ✅ Completed |
-| AWS EC2 | ⏳ Planned |
-| Jenkins CI/CD | ⏳ Planned |
+| AWS EC2 Infrastructure | ✅ Completed |
+| Jenkins Continuous Integration | ✅ Completed |
+| Amazon ECR | ✅ Completed |
+| Continuous Deployment | ⏳ Day 07 |
 
 ---
 
-# 🚀 Next Step
+# 🎯 Next Step
 
-Proceed to **Day 06 – AWS EC2 Deployment**, where the complete ShopSphere application will be deployed to a cloud server using Docker, Docker Compose, and Nginx.
+Implement the Continuous Deployment (CD) pipeline by:
+
+- Configuring GitHub Webhooks
+- Pulling Docker images from Amazon ECR
+- Deploying the application using Docker Compose
+- Performing Health Checks
+- Implementing Rollback Strategy
+
+This will complete the end-to-end CI/CD pipeline for the ShopSphere production-ready DevOps project.
