@@ -1,37 +1,50 @@
 # 🐳 Docker Documentation
 
-This document explains the Docker architecture, containerization strategy, images, networking, and Docker Compose configuration used in the **ShopSphere Production-Ready DevOps Project**.
+## 📖 Overview
+
+Docker is the core technology used to containerize the ShopSphere application. Every application component runs inside its own container, ensuring consistent behavior across development, testing, and production environments.
+
+The ShopSphere application uses Docker and Docker Compose to manage multiple services while Jenkins automates image creation and Amazon ECR stores versioned production images.
 
 ---
 
-# 🎯 Objective
+# 🎯 Objectives
 
-The objective of containerizing the ShopSphere application is to provide a consistent, portable, and production-ready environment across development, testing, and deployment.
+The Docker implementation aims to:
 
-Docker ensures that the application runs consistently regardless of the underlying operating system or infrastructure.
+- Containerize the frontend and backend applications
+- Isolate application services
+- Simplify development and deployment
+- Maintain consistency across environments
+- Enable automated CI/CD
+- Support production deployments
 
 ---
 
 # 🏗️ Docker Architecture
 
 ```text
-                 Docker Host
-                      │
-     ┌────────────────┼────────────────┐
-     ▼                ▼                ▼
-Frontend        Backend         PostgreSQL
-(Container)    (Container)      (Container)
-     │              │                │
-     └──────────────┼────────────────┘
-                    │
-             Docker Network
+                    Docker Host
+                         │
+      ┌──────────────────┼──────────────────┐
+      ▼                  ▼                  ▼
+ React Frontend     Express Backend     PostgreSQL
+   Container          Container          Container
+      │                  │                  │
+      └──────────────┬───┴──────────────────┘
+                     │
+             Docker Bridge Network
+                     │
+                     ▼
+            Nginx Reverse Proxy
+                     │
+                     ▼
+                  Browser
 ```
 
 ---
 
 # 📦 Docker Containers
-
-The ShopSphere application consists of the following containers:
 
 | Container | Purpose | Port |
 |-----------|---------|------|
@@ -44,69 +57,101 @@ The ShopSphere application consists of the following containers:
 
 # 🐳 Docker Images
 
-### Development Images
+## Development Images
 
 | Image | Description |
 |--------|-------------|
 | shopsphere-frontend | React Frontend |
 | shopsphere-backend | Express Backend |
-| postgres:16 | PostgreSQL Database |
+| postgres:16 | PostgreSQL |
 | nginx:latest | Reverse Proxy |
 
 ---
 
-### Production Images
+## Production Images
 
-The Jenkins CI pipeline builds and pushes Docker images to Amazon Elastic Container Registry (ECR).
+Jenkins automatically builds and pushes versioned Docker images to Amazon Elastic Container Registry (ECR).
 
-Example image tags:
+Example:
 
+```text
+backend-1
+backend-2
+backend-latest
+
+frontend-1
+frontend-2
+frontend-latest
 ```
-backend:3
-backend:latest
 
-frontend:3
-frontend:latest
+---
+
+# 📂 Docker Project Structure
+
+```text
+shopsphere-devops/
+
+├── backend/
+│   └── Dockerfile
+│
+├── frontend/
+│   └── Dockerfile
+│
+├── nginx/
+│   └── default.conf
+│
+├── database/
+│   ├── 01-schema.sql
+│   └── 02-seed.sql
+│
+├── docker-compose.yml
+├── docker-compose.prod.yml
+└── .dockerignore
 ```
 
 ---
 
 # 📄 Dockerfiles
 
-Separate Dockerfiles have been created for:
+Separate Dockerfiles are maintained for the frontend and backend.
 
-- Frontend
-- Backend
+Each Dockerfile performs the following:
 
-Each Dockerfile:
-
-- Uses Node.js base image
-- Installs project dependencies
+- Uses an official Node.js base image
 - Sets the working directory
-- Copies source code
+- Installs dependencies
+- Copies application source code
 - Exposes the application port
 - Starts the application
 
 ---
 
-# 🚀 Docker Compose
+# ⚙️ Docker Compose
 
-Docker Compose is used to orchestrate all application services.
+Docker Compose orchestrates all services.
 
-Services include:
+Services:
 
-- React Frontend
-- Express Backend
+- Frontend
+- Backend
 - PostgreSQL
 - Nginx
 
-Docker Compose automatically creates a shared network allowing all services to communicate using service names.
+Benefits:
+
+- Single command deployment
+- Automatic networking
+- Volume management
+- Environment variable support
+- Service discovery
 
 Example:
 
-```
+```env
 DB_HOST=postgres
 ```
+
+The backend connects to PostgreSQL using the Docker service name instead of an IP address.
 
 ---
 
@@ -118,30 +163,82 @@ Browser
     ▼
 Nginx
     │
- ┌──┴──────────────┐
- ▼                 ▼
-Frontend      Backend API
+ ┌──┴───────────────┐
+ ▼                  ▼
+Frontend       Backend API
                     │
                     ▼
-             PostgreSQL Database
+             PostgreSQL
+```
+
+---
+
+# 🛜 Docker Networking
+
+Docker Compose automatically creates a bridge network.
+
+Communication:
+
+| Source | Destination |
+|---------|-------------|
+| Browser | Nginx |
+| Nginx | Frontend |
+| Nginx | Backend |
+| Backend | PostgreSQL |
+
+Services communicate using Docker service names instead of IP addresses.
+
+---
+
+# 💾 Docker Volumes
+
+Persistent storage is used for PostgreSQL.
+
+Volume Benefits:
+
+- Data persistence
+- Easy container replacement
+- Database recovery
+- Simplified upgrades
+
+---
+
+# 🔧 Environment Variables
+
+Backend:
+
+```env
+PORT=5000
+
+DB_HOST=postgres
+DB_PORT=5432
+DB_NAME=shopsphere
+DB_USER=postgres
+DB_PASSWORD=postgres
+```
+
+Frontend:
+
+```env
+VITE_API_URL=http://localhost:5000
 ```
 
 ---
 
 # ▶️ Docker Commands
 
-## Build and Start Containers
+## Build Images
 
 ```bash
-docker compose up --build
+docker compose build
 ```
 
 ---
 
-## Start Existing Containers
+## Start Containers
 
 ```bash
-docker compose up
+docker compose up -d
 ```
 
 ---
@@ -162,7 +259,7 @@ docker compose restart
 
 ---
 
-## View Running Containers
+## View Containers
 
 ```bash
 docker ps
@@ -170,7 +267,7 @@ docker ps
 
 ---
 
-## View Docker Images
+## View Images
 
 ```bash
 docker images
@@ -186,14 +283,6 @@ docker compose logs
 
 ---
 
-## Remove Containers
-
-```bash
-docker compose down
-```
-
----
-
 ## Rebuild Containers
 
 ```bash
@@ -202,102 +291,7 @@ docker compose up --build --force-recreate
 
 ---
 
-# ☁️ Docker in AWS
-
-During Day 6 of the DevOps Challenge, Docker images are automatically built using Jenkins and stored in Amazon Elastic Container Registry (ECR).
-
-Deployment workflow:
-
-```text
-GitHub
-
-↓
-
-Jenkins
-
-↓
-
-Docker Build
-
-↓
-
-Amazon ECR
-```
-
-The application deployment from Amazon ECR to AWS EC2 will be implemented during Day 7.
-
----
-
-# 🔍 Validation
-
-Successfully verified:
-
-- Docker images built successfully
-- Containers started successfully
-- Docker networking configured
-- PostgreSQL connectivity established
-- Backend APIs responding correctly
-- Frontend communicating with backend
-- Jenkins successfully building Docker images
-- Docker images successfully pushed to Amazon ECR
-
----
-
-# 📸 Recommended Screenshots
-
-Include the following screenshots:
-
-- Docker Images (`docker images`)
-- Running Containers (`docker ps`)
-- Docker Compose Output
-- Frontend Running
-- Backend API Response
-- PostgreSQL Container
-- Amazon ECR Repository
-- Jenkins Build Success
-
----
-
-# ⚠️ Troubleshooting
-
-## Container Not Starting
-
-```bash
-docker compose logs
-```
-
----
-
-## Port Already in Use
-
-```bash
-docker ps
-```
-
-Stop any conflicting containers.
-
----
-
-## Database Connection Failed
-
-Verify:
-
-- PostgreSQL container is running
-- Database credentials
-- Docker network
-- Service name (`postgres`)
-
----
-
-## Docker Build Failed
-
-```bash
-docker compose build --no-cache
-```
-
----
-
-## Remove Unused Docker Resources
+## Remove Unused Resources
 
 ```bash
 docker system prune -f
@@ -305,11 +299,154 @@ docker system prune -f
 
 ---
 
-# 🎯 Outcome
+# ☁️ Docker with AWS
 
-The ShopSphere application has been successfully containerized using Docker and Docker Compose.
+Production workflow:
 
-The application can now run consistently across different environments, while Jenkins automates Docker image creation and publishes versioned images to Amazon ECR for production deployment.
+```text
+Developer
+    │
+git push
+    │
+    ▼
+GitHub Repository
+    │
+    ▼
+Jenkins Pipeline
+    │
+Build Docker Images
+    │
+    ▼
+Amazon ECR
+    │
+    ▼
+AWS EC2
+    │
+Docker Compose
+    │
+    ▼
+Application
+```
+
+---
+
+# 🔄 Docker Deployment Workflow
+
+```text
+Source Code
+
+↓
+
+Docker Build
+
+↓
+
+Docker Images
+
+↓
+
+Amazon ECR
+
+↓
+
+Docker Pull
+
+↓
+
+Docker Compose
+
+↓
+
+Containers Running
+```
+
+---
+
+# ❤️ Health Verification
+
+Verify containers
+
+```bash
+docker ps
+```
+
+Verify backend
+
+```bash
+curl http://localhost:5000/health
+```
+
+Verify products
+
+```bash
+curl http://localhost:5000/api/products
+```
+
+---
+
+# 🛠️ Troubleshooting
+
+## Containers Not Running
+
+```bash
+docker ps -a
+```
+
+---
+
+## View Logs
+
+```bash
+docker logs shopsphere-backend
+
+docker logs shopsphere-frontend
+
+docker logs shopsphere-nginx
+```
+
+---
+
+## Database Connection Failed
+
+Check:
+
+- PostgreSQL container
+- Docker network
+- Environment variables
+- Database credentials
+
+---
+
+## Rebuild Images
+
+```bash
+docker compose build --no-cache
+```
+
+---
+
+## Restart Deployment
+
+```bash
+docker compose down
+
+docker compose up -d
+```
+
+---
+
+# 📸 Recommended Screenshots
+
+Include screenshots of:
+
+- Docker Images (`docker images`)
+- Running Containers (`docker ps`)
+- Docker Compose Output
+- PostgreSQL Container
+- Backend Health API
+- Products API
+- Amazon ECR Repository
+- Jenkins Pipeline Success
 
 ---
 
@@ -319,16 +456,28 @@ The application can now run consistently across different environments, while Je
 - Docker Containers
 - Dockerfile
 - Docker Compose
-- Multi-Container Applications
 - Docker Networking
-- Port Mapping
+- Multi-Container Applications
+- Environment Variables
 - Volume Management
-- Docker CLI
-- Amazon ECR Integration
-- Jenkins Docker Automation
+- Container Orchestration
+- Amazon ECR
+- Jenkins Integration
+- Production Deployment
 
 ---
 
-# 🚀 Next Step
+# 🎯 Outcome
 
-Deploy the Docker images from Amazon Elastic Container Registry (ECR) to AWS EC2 using Docker Compose, followed by GitHub Webhooks, automated deployments, health checks, and rollback implementation.
+The ShopSphere application has been successfully containerized using Docker and Docker Compose.
+
+The application now follows a production-style containerized architecture where:
+
+- Each service runs in an isolated container.
+- Docker Compose manages multi-container deployment.
+- Jenkins automatically builds versioned Docker images.
+- Images are stored in Amazon ECR.
+- Production deployments use Docker Compose on AWS EC2.
+- Nginx routes incoming traffic to the application services.
+
+This implementation demonstrates modern Docker practices commonly used in production environments.

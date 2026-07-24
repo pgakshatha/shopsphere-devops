@@ -1,25 +1,42 @@
 # 🚀 Deployment Guide
 
-This document explains how to deploy the **ShopSphere** application across development and production environments.
+## 📖 Overview
+
+This guide explains how to deploy the **ShopSphere** application in both development and production environments.
+
+The application is deployed using:
+
+- Docker
+- Docker Compose
+- AWS EC2
+- Amazon ECR
+- Jenkins
+- GitHub
+- Nginx
+- PostgreSQL
+
+The production deployment is fully automated using a Jenkins CI/CD pipeline.
 
 ---
 
 # 📋 Prerequisites
 
-Before deploying the application, ensure the following software is installed:
+Install the following software before starting.
 
-- Git
-- Docker
-- Docker Compose
-- AWS CLI
-- Jenkins (for CI)
-- Node.js (Optional for local development)
+| Software | Version |
+|----------|----------|
+| Git | Latest |
+| Docker | Latest |
+| Docker Compose | Latest |
+| Node.js | 20+ |
+| AWS CLI | Latest |
+| Jenkins | Latest |
 
 ---
 
 # 💻 Local Deployment
 
-## 1. Clone the Repository
+## Clone Repository
 
 ```bash
 git clone https://github.com/pgakshatha/shopsphere-devops.git
@@ -29,21 +46,16 @@ cd shopsphere-devops
 
 ---
 
-## 2. Configure Environment Variables
+## Backend Environment
 
-### Backend
-
-Create:
+Create
 
 ```
 backend/.env
 ```
 
-Example:
-
 ```env
 PORT=5000
-NODE_ENV=development
 
 DB_HOST=postgres
 DB_PORT=5432
@@ -52,9 +64,11 @@ DB_USER=postgres
 DB_PASSWORD=postgres
 ```
 
-### Frontend
+---
 
-Create:
+## Frontend Environment
+
+Create
 
 ```
 frontend/.env
@@ -66,16 +80,16 @@ VITE_API_URL=http://localhost:5000
 
 ---
 
-## 3. Install Dependencies
+## Install Dependencies
 
-### Backend
+Backend
 
 ```bash
 cd backend
 npm install
 ```
 
-### Frontend
+Frontend
 
 ```bash
 cd frontend
@@ -84,30 +98,13 @@ npm install
 
 ---
 
-## 4. Initialize PostgreSQL
-
-Create the database:
-
-```sql
-CREATE DATABASE shopsphere;
-```
-
-Run:
+## Run Backend
 
 ```bash
-npm run init-db
-```
-
----
-
-## 5. Run Backend
-
-```bash
-cd backend
 npm run dev
 ```
 
-Backend URL
+Runs on
 
 ```
 http://localhost:5000
@@ -115,14 +112,13 @@ http://localhost:5000
 
 ---
 
-## 6. Run Frontend
+## Run Frontend
 
 ```bash
-cd frontend
 npm run dev
 ```
 
-Frontend URL
+Runs on
 
 ```
 http://localhost:5173
@@ -132,31 +128,31 @@ http://localhost:5173
 
 # 🐳 Docker Deployment
 
-## Build Containers
+Build images
 
 ```bash
-docker compose up --build
+docker compose build
 ```
 
----
+Start containers
 
-## Stop Containers
+```bash
+docker compose up -d
+```
+
+Stop containers
 
 ```bash
 docker compose down
 ```
 
----
-
-## View Running Containers
+View running containers
 
 ```bash
 docker ps
 ```
 
----
-
-## Rebuild Containers
+Rebuild
 
 ```bash
 docker compose up --build --force-recreate
@@ -164,25 +160,56 @@ docker compose up --build --force-recreate
 
 ---
 
-# ☁️ AWS Deployment (Day 06)
+# ☁️ AWS Infrastructure
 
-The application infrastructure has been prepared for cloud deployment.
+Production deployment uses
 
-Completed:
-
-- AWS EC2 Instance
-- IAM Role Configuration
-- Amazon ECR Repository
-- Docker Installation
-- Docker Compose Installation
-- AWS CLI Installation
-- Jenkins Installation
+- AWS EC2
+- IAM Role
+- Amazon ECR
+- Docker
+- Docker Compose
+- Jenkins
+- Nginx
 
 ---
 
-## Build & Push Docker Images
+## Configure AWS CLI
 
-The Jenkins CI pipeline automatically performs:
+```bash
+aws configure
+```
+
+Verify
+
+```bash
+aws sts get-caller-identity
+```
+
+---
+
+# 📦 Amazon ECR
+
+Login
+
+```bash
+aws ecr get-login-password --region ap-south-1 \
+| docker login \
+--username AWS \
+--password-stdin <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com
+```
+
+Pull Images
+
+```bash
+docker compose -f docker-compose.prod.yml pull
+```
+
+---
+
+# ⚙️ Jenkins CI/CD Pipeline
+
+The Jenkins pipeline performs the following steps automatically.
 
 ```text
 Checkout Source Code
@@ -202,132 +229,227 @@ Tag Docker Images
 ↓
 
 Push Images to Amazon ECR
-```
 
-Images stored in Amazon ECR:
+↓
 
-```
-backend:<BUILD_NUMBER>
-backend:latest
+Deploy to EC2
 
-frontend:<BUILD_NUMBER>
-frontend:latest
+↓
+
+Health Check
 ```
 
 ---
 
-# 📦 Docker Services
+# 🔗 GitHub Webhook
 
-| Service | Port |
-|----------|------|
-| React Frontend | 5173 |
-| Express Backend | 5000 |
-| PostgreSQL | 5432 |
-| Nginx | 80 |
+Configure
+
+```
+Repository
+
+↓
+
+Settings
+
+↓
+
+Webhooks
+
+↓
+
+Add Webhook
+```
+
+Payload URL
+
+```
+http://<EC2_PUBLIC_IP>:8080/github-webhook/
+```
+
+Content Type
+
+```
+application/json
+```
+
+Events
+
+```
+Push Events
+```
 
 ---
 
-# 🔍 Health Check
+# 🚀 Production Deployment
 
-Backend Health Endpoint
+Deploy
 
+```bash
+docker compose -f docker-compose.prod.yml down
+
+docker compose -f docker-compose.prod.yml pull
+
+docker compose -f docker-compose.prod.yml up -d
 ```
-GET /health
+
+Verify
+
+```bash
+docker ps
 ```
 
-Example:
+---
+
+# 🌐 Application URLs
+
+| Service | URL |
+|----------|-----|
+| Frontend | http://EC2_PUBLIC_IP |
+| Backend Health | http://EC2_PUBLIC_IP/health |
+| Products API | http://EC2_PUBLIC_IP/api/products |
+
+---
+
+# ❤️ Health Check
+
+```bash
+curl http://localhost:5000/health
+```
+
+Expected
 
 ```json
 {
-  "status": "UP",
-  "service": "ShopSphere Backend",
-  "version": "1.0.0"
+  "status":"UP",
+  "service":"ShopSphere Backend",
+  "version":"1.0.0"
 }
 ```
 
 ---
 
-# 📡 Products API
+# 📦 Products API
 
-```
-GET /api/products
+```bash
+curl http://localhost:5000/api/products
 ```
 
-Returns all products stored in PostgreSQL.
+Returns
+
+- Product Name
+- Description
+- Price
+- Image
 
 ---
 
-# 🏗️ Current Deployment Architecture
+# 🏗️ Deployment Architecture
 
 ```text
-                 Developer
-                     │
-                 git push
-                     │
-                     ▼
-             GitHub Repository
-                     │
-                     ▼
-            Jenkins (AWS EC2)
-                     │
-           Build Docker Images
-                     │
-                     ▼
-        Amazon Elastic Container Registry
+                     Developer
+                         │
+                     git push
+                         │
+                         ▼
+                 GitHub Repository
+                         │
+                  GitHub Webhook
+                         │
+                         ▼
+                 Jenkins Pipeline
+                         │
+               Checkout Source Code
+                         │
+                         ▼
+               Build Docker Images
+                         │
+                         ▼
+             Push Images to Amazon ECR
+                         │
+                         ▼
+                  AWS EC2 Instance
+                         │
+              Docker Compose Deploy
+                         │
+             Nginx Reverse Proxy
+               ┌────────┴────────┐
+               ▼                 ▼
+        React Frontend    Express Backend
+                                  │
+                                  ▼
+                          PostgreSQL Database
 ```
 
 ---
 
-# 🚀 Production Deployment (Day 07)
+# 🔄 Rollback
 
-The final phase of the project will implement Continuous Deployment.
+List images
 
-Deployment workflow:
-
-```text
-GitHub Push
-
-↓
-
-GitHub Webhook
-
-↓
-
-Jenkins
-
-↓
-
-Build Images
-
-↓
-
-Push Images to Amazon ECR
-
-↓
-
-Pull Images on AWS EC2
-
-↓
-
-Docker Compose
-
-↓
-
-Nginx
-
-↓
-
-Application
+```bash
+docker images
 ```
 
-Production features:
+Deploy previous version
 
-- GitHub Webhooks
-- Continuous Deployment
-- Docker Compose Deployment
-- Health Checks
-- Rollback Strategy
-- Image Versioning
+```bash
+docker pull backend:previous
+
+docker pull frontend:previous
+```
+
+Update
+
+```
+docker-compose.prod.yml
+```
+
+Restart
+
+```bash
+docker compose down
+
+docker compose up -d
+```
+
+---
+
+# 🛠️ Troubleshooting
+
+## Containers Not Running
+
+```bash
+docker ps -a
+```
+
+---
+
+## View Logs
+
+```bash
+docker logs shopsphere-backend
+
+docker logs shopsphere-frontend
+
+docker logs shopsphere-nginx
+```
+
+---
+
+## Restart Containers
+
+```bash
+docker compose restart
+```
+
+---
+
+## Check Health
+
+```bash
+curl http://localhost:5000/health
+```
 
 ---
 
@@ -335,52 +457,39 @@ Production features:
 
 ## Local
 
-- Repository Cloned
-- Dependencies Installed
-- PostgreSQL Running
-- Backend Running
-- Frontend Running
+- Repository cloned
+- Dependencies installed
+- Frontend running
+- Backend running
 
 ## Docker
 
-- Docker Installed
-- Docker Compose Installed
-- Containers Running
+- Docker installed
+- Containers running
 
 ## AWS
 
-- EC2 Created
-- IAM Role Attached
-- Amazon ECR Created
-- Jenkins Installed
-- Docker Images Built
-- Images Successfully Pushed to Amazon ECR
+- EC2 created
+- IAM Role attached
+- Amazon ECR configured
+- Jenkins configured
+- Docker images pushed
+- Containers deployed
+- Health checks passed
 
 ---
 
-# 📊 Deployment Status
+# 🎯 Deployment Summary
 
-| Environment | Status |
-|-------------|--------|
-| Local Development | ✅ Completed |
-| Docker | ✅ Completed |
-| Docker Compose | ✅ Completed |
-| Production Preparation | ✅ Completed |
-| AWS EC2 Infrastructure | ✅ Completed |
-| Jenkins Continuous Integration | ✅ Completed |
-| Amazon ECR | ✅ Completed |
-| Continuous Deployment | ⏳ Day 07 |
+The ShopSphere application follows a modern deployment workflow:
 
----
+1. Developer pushes code to GitHub.
+2. Jenkins automatically builds Docker images.
+3. Images are pushed to Amazon ECR.
+4. EC2 pulls the latest images.
+5. Docker Compose deploys the updated application.
+6. Nginx routes incoming traffic.
+7. Health checks verify the deployment.
+8. If required, a previous image version can be redeployed.
 
-# 🎯 Next Step
-
-Implement the Continuous Deployment (CD) pipeline by:
-
-- Configuring GitHub Webhooks
-- Pulling Docker images from Amazon ECR
-- Deploying the application using Docker Compose
-- Performing Health Checks
-- Implementing Rollback Strategy
-
-This will complete the end-to-end CI/CD pipeline for the ShopSphere production-ready DevOps project.
+This workflow demonstrates a production-style CI/CD process using AWS, Docker, Jenkins, GitHub, and Amazon ECR.

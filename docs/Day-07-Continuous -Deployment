@@ -1,0 +1,369 @@
+# 🚀 Day 07 – Continuous Deployment (CD)
+
+## 📖 Overview
+
+Day 7 marks the completion of the ShopSphere Production-Ready DevOps Challenge.
+
+The objective was to automate the deployment process so that every successful code change pushed to GitHub is automatically built, stored, and deployed to the production server with minimal manual intervention.
+
+This completes the Continuous Deployment (CD) stage of the CI/CD pipeline.
+
+---
+
+# 🎯 Objectives
+
+- Complete CI/CD Pipeline
+- Configure GitHub Webhooks
+- Automate Jenkins Pipeline
+- Push Docker Images to Amazon ECR
+- Deploy Latest Images on AWS EC2
+- Verify Application Health
+- Implement Rollback Strategy
+
+---
+
+# 🏗️ Final Deployment Architecture
+
+```text
+                           Developer
+                               │
+                           git push
+                               │
+                               ▼
+                      GitHub Repository
+                               │
+                        GitHub Webhook
+                               │
+                               ▼
+                      Jenkins Pipeline
+                               │
+                Checkout Latest Source Code
+                               │
+                               ▼
+                 Build Docker Images
+                               │
+                               ▼
+               Push Images to Amazon ECR
+                               │
+                               ▼
+                     AWS EC2 Instance
+                               │
+               Docker Compose Deployment
+                               │
+                      Nginx Reverse Proxy
+               ┌───────────────┴───────────────┐
+               ▼                               ▼
+        React Frontend                 Express Backend
+                                              │
+                                              ▼
+                                     PostgreSQL Database
+```
+
+---
+
+# ⚙️ CI/CD Workflow
+
+## Step 1
+
+Developer pushes code.
+
+```bash
+git add .
+git commit -m "Feature update"
+git push origin main
+```
+
+---
+
+## Step 2
+
+GitHub automatically triggers Jenkins using a webhook.
+
+---
+
+## Step 3
+
+Jenkins performs:
+
+- Checkout latest source
+- Build frontend image
+- Build backend image
+- Tag Docker images
+- Push images to Amazon ECR
+
+---
+
+## Step 4
+
+AWS EC2 pulls the latest Docker images.
+
+```bash
+docker compose -f docker-compose.prod.yml pull
+```
+
+---
+
+## Step 5
+
+Docker Compose recreates the containers.
+
+```bash
+docker compose -f docker-compose.prod.yml up -d
+```
+
+---
+
+## Step 6
+
+Health Check
+
+```bash
+curl http://localhost:5000/health
+```
+
+Expected Response
+
+```json
+{
+  "status":"UP",
+  "service":"ShopSphere Backend",
+  "version":"1.0.0"
+}
+```
+
+---
+
+# 🔗 GitHub Webhook
+
+Repository
+
+```
+Settings
+→ Webhooks
+→ Add Webhook
+```
+
+Payload URL
+
+```
+http://<EC2_PUBLIC_IP>:8080/github-webhook/
+```
+
+Content Type
+
+```
+application/json
+```
+
+Trigger
+
+```
+Push Events
+```
+
+---
+
+# 📦 Amazon ECR
+
+Docker Images
+
+```
+backend-latest
+frontend-latest
+```
+
+Versioned Images
+
+```
+backend-1
+backend-2
+backend-3
+
+frontend-1
+frontend-2
+frontend-3
+```
+
+---
+
+# ☁️ AWS Infrastructure
+
+Production Environment
+
+- AWS EC2
+- Docker
+- Docker Compose
+- Jenkins
+- Amazon ECR
+- IAM Role
+- Nginx
+- PostgreSQL
+
+---
+
+# ❤️ Health Verification
+
+Verify Backend
+
+```bash
+curl http://localhost:5000/health
+```
+
+Verify Products
+
+```bash
+curl http://localhost:5000/api/products
+```
+
+Verify Running Containers
+
+```bash
+docker ps
+```
+
+---
+
+# 🔄 Rollback Strategy
+
+If deployment fails,
+
+Pull the previous Docker image.
+
+Example
+
+```bash
+docker pull backend-2
+
+docker pull frontend-2
+```
+
+Update
+
+```
+docker-compose.prod.yml
+```
+
+Restart
+
+```bash
+docker compose down
+
+docker compose up -d
+```
+
+Application is restored to the previous stable version.
+
+---
+
+# 📊 Deployment Verification
+
+Verify
+
+- Frontend loads successfully
+- Backend APIs respond
+- PostgreSQL connected
+- Jenkins build successful
+- Images available in Amazon ECR
+- Containers running
+- Health endpoint returns success
+
+---
+
+# 📸 Recommended Screenshots
+
+Include screenshots of:
+
+- GitHub Repository
+- Jenkins Dashboard
+- Jenkins Successful Build
+- Jenkins Console Output
+- Amazon ECR Repository
+- Docker Images
+- Docker Containers
+- Health API
+- Products API
+- Final Application
+- Architecture Diagram
+
+---
+
+# 📚 Technologies Used
+
+## Frontend
+
+- React
+- Vite
+- Tailwind CSS
+
+## Backend
+
+- Node.js
+- Express.js
+
+## Database
+
+- PostgreSQL
+
+## DevOps
+
+- Docker
+- Docker Compose
+- Jenkins
+- GitHub
+- GitHub Webhooks
+- AWS EC2
+- Amazon ECR
+- IAM Roles
+- Nginx
+- CI/CD
+
+---
+
+# 🎯 Skills Demonstrated
+
+- Docker Containerization
+- Docker Compose
+- Jenkins Pipeline
+- GitHub Webhooks
+- Amazon ECR
+- AWS EC2
+- Nginx Reverse Proxy
+- PostgreSQL
+- CI/CD Pipeline
+- Automated Deployment
+- Health Checks
+- Rollback Strategy
+
+---
+
+# 🏆 Outcome
+
+The ShopSphere project successfully demonstrates a complete production-style DevOps workflow.
+
+Achievements:
+
+- ✅ React Frontend
+- ✅ Express Backend
+- ✅ PostgreSQL Database
+- ✅ Docker Containerization
+- ✅ Docker Compose
+- ✅ Nginx Reverse Proxy
+- ✅ AWS EC2 Deployment
+- ✅ Amazon ECR Integration
+- ✅ Jenkins Continuous Integration
+- ✅ Automated Continuous Deployment
+- ✅ GitHub Webhooks
+- ✅ Health Checks
+- ✅ Rollback Strategy
+
+This completes the 7-Day Production-Ready DevOps Challenge and showcases a modern CI/CD workflow suitable for production environments.
+
+---
+
+# 🎉 Challenge Completed
+
+Over the course of seven days, the ShopSphere application evolved from a simple local development setup into a production-style deployment on AWS.
+
+The project demonstrates practical experience with application development, containerization, cloud infrastructure, automation, and deployment workflows commonly used in modern DevOps environments.
+
+This challenge provided hands-on experience with designing, building, deploying, and maintaining a production-ready application using industry-standard tools and practices.

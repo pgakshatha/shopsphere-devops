@@ -1,146 +1,203 @@
 # 🏗️ ShopSphere Architecture
 
-This document describes the architecture evolution of the **ShopSphere Production-Ready DevOps Project** throughout the **7-Day DevOps Challenge**.
+## 📖 Overview
 
-The objective of this project is to build a production-style e-commerce application while implementing real-world DevOps practices including Docker, AWS, Jenkins CI/CD, and automated deployments.
+ShopSphere is a production-ready e-commerce application built as part of a **7-Day DevOps Challenge**. The objective was to design, containerize, deploy, and automate a modern web application using industry-standard DevOps practices.
+
+Throughout this challenge, the application evolved from a simple local development setup into a production-style deployment on AWS with an automated CI/CD pipeline.
 
 ---
 
-# 📅 Day 01 – Project Initialization
+# 📅 Day 1 – Project Initialization
 
-The project started with independent frontend and backend applications running locally.
+The project started by building the frontend and backend independently on the local development machine.
+
+## Architecture
 
 ```text
-                   Developer Laptop
-                          │
-          ┌───────────────┴───────────────┐
-          ▼                               ▼
-    React Frontend                 Express Backend
-   (Vite - Port 5173)            (Port 5000)
+                    Developer Laptop
+                           │
+          ┌────────────────┴────────────────┐
+          ▼                                 ▼
+   React Frontend                    Node.js Backend
+   (Vite - Port 5173)              (Express - Port 5000)
+                                              │
+                                              ▼
+                                    REST API Endpoints
+                                    • GET /
+                                    • GET /health
+                                    • GET /api/products
 ```
 
-### Components
+## Objectives
 
-- React Frontend
-- Express Backend
-- REST APIs
+- Initialize Git Repository
+- Create GitHub Repository
+- Setup React Application
+- Setup Express Backend
+- Create REST APIs
+- Project Folder Structure
+
+## Technologies
+
+- React
+- Vite
+- Node.js
+- Express
 - Git
 - GitHub
 
 ---
 
-# 📅 Day 02 – Docker Containerization
+# 📅 Day 2 – Docker Containerization
 
-Both applications were containerized using Docker for consistent development and deployment.
+The application was containerized using Docker to ensure consistency across development and deployment environments.
+
+## Architecture
 
 ```text
-                 Docker Host
-                      │
-      ┌───────────────┴───────────────┐
-      ▼                               ▼
-Frontend Container             Backend Container
-   Port 5173                      Port 5000
+                   Docker Host
+                        │
+        ┌───────────────┴───────────────┐
+        ▼                               ▼
+ Frontend Container             Backend Container
+      React                         Express
+    Port 5173                     Port 5000
 ```
 
-### Components
+## Objectives
 
+- Create Dockerfile for Frontend
+- Create Dockerfile for Backend
 - Docker Images
 - Docker Containers
+- Multi-container Development
+
+## Technologies
+
+- Docker
 - Docker Compose
-- Container Networking
+- Docker Networking
 
 ---
 
-# 📅 Day 03 – Frontend & Backend Integration
+# 📅 Day 3 – Frontend & Backend Integration
 
-The frontend communicates with the backend through REST APIs.
+The frontend was integrated with the backend using REST APIs.
+
+## Architecture
 
 ```text
-               Browser
-                  │
-                  ▼
-          React Frontend
-                  │
-           REST API (HTTP)
-                  │
-                  ▼
-          Express Backend
+                  Browser
+                      │
+                      ▼
+              React Frontend
+                      │
+               HTTP REST APIs
+                      │
+                      ▼
+              Express Backend
 ```
 
-### Components
+## Objectives
+
+- Fetch Products API
+- API Integration
+- Error Handling
+- Loading States
+
+## Technologies
 
 - React
+- Fetch API
 - Express
 - REST APIs
-- Fetch API
 
 ---
 
-# 📅 Day 04 – PostgreSQL Integration
+# 📅 Day 4 – PostgreSQL Integration
 
-The backend now retrieves product information from PostgreSQL instead of static JSON data.
+Static JSON data was replaced with PostgreSQL.
 
-```text
-                 Browser
-                    │
-                    ▼
-            React Frontend
-                    │
-             REST API Calls
-                    │
-                    ▼
-            Express Backend
-                    │
-                    ▼
-          PostgreSQL Database
-```
-
-### Components
-
-- React
-- Express
-- PostgreSQL
-- SQL Queries
-
----
-
-# 📅 Day 05 – Production Preparation
-
-The application was prepared for production using Docker Compose, environment variables, and Nginx as a reverse proxy.
+## Architecture
 
 ```text
                     Browser
                         │
                         ▼
-                 Nginx (Port 80)
+                React Frontend
                         │
-        ┌───────────────┴───────────────┐
-        ▼                               ▼
- React Frontend                  Express Backend
-                                        │
-                                        ▼
-                               PostgreSQL Database
-                                        │
-                                        ▼
-                             Docker Compose Network
+                REST API Requests
+                        │
+                        ▼
+                Express Backend
+                        │
+                  SQL Queries
+                        │
+                        ▼
+             PostgreSQL Database
 ```
 
-### Components
+## Objectives
 
-- Nginx Reverse Proxy
-- React Frontend
-- Express Backend
+- PostgreSQL Database
+- Database Schema
+- Product Table
+- Seed Data
+- Database Connection
+
+## Technologies
+
 - PostgreSQL
-- Docker Compose
-- Environment Variables
+- pg
+- SQL
+- Express
 
 ---
 
-# 📅 Day 06 – AWS Infrastructure & Continuous Integration
+# 📅 Day 5 – Production Preparation
 
-The project was migrated to AWS by provisioning cloud infrastructure and implementing a Jenkins Continuous Integration pipeline.
+The application was prepared for production using Docker Compose and Nginx.
 
-Docker images are automatically built and pushed to Amazon Elastic Container Registry (ECR).
+## Architecture
+
+```text
+                     Browser
+                         │
+                         ▼
+                 Nginx Reverse Proxy
+                     Port 80
+                         │
+          ┌──────────────┴──────────────┐
+          ▼                             ▼
+ React Frontend                  Express Backend
+                                         │
+                                         ▼
+                               PostgreSQL Database
+```
+
+## Objectives
+
+- Docker Compose
+- Environment Variables
+- Reverse Proxy
+- Production Configuration
+- Health Check Endpoint
+
+## Technologies
+
+- Docker Compose
+- Nginx
+- Environment Variables
+- PostgreSQL
+
+---
+
+# 📅 Day 6 – AWS Infrastructure & Continuous Integration
+
+The project was migrated to AWS. Jenkins was introduced for Continuous Integration, and Docker images were pushed to Amazon ECR.
+
+## Architecture
 
 ```text
                     Developer
@@ -148,21 +205,30 @@ Docker images are automatically built and pushed to Amazon Elastic Container Reg
                     git push
                         │
                         ▼
-                GitHub Repository
+               GitHub Repository
                         │
                         ▼
-               Jenkins (AWS EC2)
+                 Jenkins Pipeline
                         │
-                Checkout Source Code
-                        │
-                        ▼
-              Build Docker Images
+          Checkout Source Code
                         │
                         ▼
-            Push Images to Amazon ECR
+          Build Docker Images
+                        │
+                        ▼
+         Push Images to Amazon ECR
 ```
 
-### Components
+## Objectives
+
+- Launch AWS EC2
+- Install Jenkins
+- Configure IAM Role
+- Create Amazon ECR Repository
+- Build Docker Images
+- Push Images to ECR
+
+## Technologies
 
 - AWS EC2
 - Jenkins
@@ -170,16 +236,14 @@ Docker images are automatically built and pushed to Amazon Elastic Container Reg
 - Amazon ECR
 - Docker
 - GitHub
-- Docker Image Versioning
-- Continuous Integration (CI)
 
 ---
 
-# 📅 Day 07 – Automated Deployment (Upcoming)
+# 📅 Day 7 – Continuous Deployment
 
-The final phase completes the Continuous Deployment pipeline.
+The final stage automates deployments whenever code is pushed to GitHub.
 
-Jenkins will automatically deploy the latest Docker images from Amazon ECR to the EC2 instance after every successful build.
+## Architecture
 
 ```text
                     Developer
@@ -187,117 +251,189 @@ Jenkins will automatically deploy the latest Docker images from Amazon ECR to th
                     git push
                         │
                         ▼
-                GitHub Repository
+               GitHub Repository
                         │
-                 GitHub Webhook
-                        │
-                        ▼
-               Jenkins (AWS EC2)
-                        │
-              Build Docker Images
+                GitHub Webhook
                         │
                         ▼
-            Push Images to Amazon ECR
+                 Jenkins Pipeline
+                        │
+        Checkout Latest Source Code
                         │
                         ▼
-           Pull Images from Amazon ECR
-                        │
-                        ▼
-             Docker Compose Deployment
-                        │
-                        ▼
-              Nginx Reverse Proxy
-              ┌──────────┴──────────┐
-              ▼                     ▼
-      React Frontend         Express Backend
-                                      │
-                                      ▼
-                             PostgreSQL Database
-```
-
-### Planned Components
-
-- GitHub Webhooks
-- Continuous Deployment (CD)
-- Docker Compose
-- Nginx Reverse Proxy
-- Health Checks
-- Rollback Strategy
-- Automated Deployments
-
----
-
-# 📊 Architecture Evolution
-
-| Day | Architecture Improvement | Status |
-|------|---------------------------|--------|
-| Day 1 | Project Initialization | ✅ Completed |
-| Day 2 | Docker Containerization | ✅ Completed |
-| Day 3 | Frontend & Backend Integration | ✅ Completed |
-| Day 4 | PostgreSQL Integration | ✅ Completed |
-| Day 5 | Production Preparation (Nginx & Environment Variables) | ✅ Completed |
-| Day 6 | AWS Infrastructure, Jenkins CI & Amazon ECR | ✅ Completed |
-| Day 7 | Automated Deployment, GitHub Webhooks & Rollback | ⏳ In Progress |
-
----
-
-# 🎯 Current Architecture Highlights
-
-The current implementation includes:
-
-- ✅ React Frontend
-- ✅ Express Backend
-- ✅ PostgreSQL Database
-- ✅ Docker
-- ✅ Docker Compose
-- ✅ Nginx Reverse Proxy
-- ✅ Environment Variables
-- ✅ REST APIs
-- ✅ Health Check Endpoint
-- ✅ AWS EC2
-- ✅ Jenkins
-- ✅ IAM Role
-- ✅ Amazon ECR
-- ✅ Docker Image Versioning
-- ✅ Continuous Integration Pipeline
-
----
-
-# 🚀 Final Production Workflow
-
-```text
-                    Developer
-                        │
-                    git push
-                        │
-                        ▼
-                GitHub Repository
-                        │
-                 GitHub Webhook
-                        │
-                        ▼
-               Jenkins Pipeline
-                        │
-          Checkout Source Code
-                        │
           Build Docker Images
                         │
-          Push Images to Amazon ECR
+                        ▼
+         Push Images to Amazon ECR
                         │
-          Pull Images on AWS EC2
+                        ▼
+       Pull Latest Images on AWS EC2
                         │
-         Docker Compose Deployment
+                        ▼
+       Docker Compose Production
                         │
-             Health Check (/health)
-                        │
-          ┌─────────────┴─────────────┐
-          ▼                           ▼
-     Deployment Success         Rollback Previous Version
+                        ▼
+             Nginx Reverse Proxy
+            ┌──────────┴──────────┐
+            ▼                     ▼
+     React Frontend         Express Backend
+                                     │
+                                     ▼
+                            PostgreSQL Database
+```
+
+## Objectives
+
+- GitHub Webhooks
+- Continuous Deployment
+- Automated Docker Pull
+- Zero Manual Deployment
+- Health Checks
+- Rollback Strategy
+
+## Technologies
+
+- GitHub Webhooks
+- Jenkins
+- Docker Compose
+- Amazon ECR
+- AWS EC2
+- Nginx
+
+---
+
+# 📈 Architecture Evolution
+
+| Day | Architecture | Status |
+|------|--------------|--------|
+| Day 1 | Local Development | ✅ Completed |
+| Day 2 | Docker Containerization | ✅ Completed |
+| Day 3 | Frontend-Backend Integration | ✅ Completed |
+| Day 4 | PostgreSQL Integration | ✅ Completed |
+| Day 5 | Production Setup with Nginx | ✅ Completed |
+| Day 6 | AWS + Jenkins + Amazon ECR | ✅ Completed |
+| Day 7 | Automated CI/CD Deployment | ✅ Completed |
+
+---
+
+# 🏛️ Final Production Architecture
+
+```text
+                               Internet
+                                   │
+                                   ▼
+                           GitHub Repository
+                                   │
+                            GitHub Webhook
+                                   │
+                                   ▼
+                          Jenkins Pipeline
+                                   │
+                    Checkout Latest Source
+                                   │
+                                   ▼
+                    Build Docker Images
+                                   │
+                                   ▼
+                     Push Images to Amazon ECR
+                                   │
+                                   ▼
+                            AWS EC2 Server
+                                   │
+                    Docker Compose Deployment
+                                   │
+                ┌──────────────────┴──────────────────┐
+                ▼                                     ▼
+         Nginx Reverse Proxy                   PostgreSQL
+                │
+        ┌───────┴────────┐
+        ▼                ▼
+ React Frontend     Express Backend
 ```
 
 ---
 
-# 📚 DevOps Technologies Used
+# 🔄 CI/CD Workflow
+
+```text
+Developer
+    │
+git push
+    │
+    ▼
+GitHub Repository
+    │
+GitHub Webhook
+    │
+    ▼
+Jenkins
+    │
+Checkout Code
+    │
+Build Docker Images
+    │
+Push to Amazon ECR
+    │
+SSH into EC2
+    │
+Pull Latest Images
+    │
+Docker Compose
+    │
+Health Check
+    │
+Deployment Successful
+```
+
+---
+
+# 🛡️ Rollback Workflow
+
+```text
+Deployment Failed
+        │
+        ▼
+Previous Docker Image
+        │
+        ▼
+docker-compose.prod.yml
+        │
+        ▼
+docker compose up -d
+        │
+        ▼
+Application Restored
+```
+
+---
+
+# 📂 Project Structure
+
+```text
+shopsphere-devops/
+│
+├── backend/
+├── frontend/
+├── nginx/
+├── database/
+├── docs/
+│   ├── Architecture.md
+│   ├── Deployment.md
+│   ├── Docker.md
+│   ├── Jenkins.md
+│   ├── Troubleshooting.md
+│   └── Rollback.md
+│
+├── docker-compose.yml
+├── docker-compose.prod.yml
+├── Jenkinsfile
+├── README.md
+└── .gitignore
+```
+
+---
+
+# 🚀 Technologies Used
 
 ## Frontend
 
@@ -320,15 +456,36 @@ The current implementation includes:
 - Docker Compose
 - Jenkins
 - GitHub
+- GitHub Webhooks
 - AWS EC2
 - Amazon ECR
 - IAM Roles
 - Nginx
+- CI/CD
+
+---
+
+# 🎯 Skills Demonstrated
+
+- Docker Containerization
+- Docker Compose
+- React Deployment
+- Express API Development
+- PostgreSQL Integration
+- Nginx Reverse Proxy
+- AWS EC2
+- Amazon ECR
+- Jenkins Pipelines
+- GitHub Webhooks
+- Continuous Integration
+- Continuous Deployment
+- Health Checks
+- Rollback Strategy
 
 ---
 
 # 🎯 Project Goal
 
-The goal of this project is to demonstrate how a modern production-ready application is built, containerized, integrated with cloud infrastructure, and automated using CI/CD pipelines following industry-standard DevOps practices.
+The objective of ShopSphere is to demonstrate how a modern production-ready application is designed, containerized, deployed, and automated using industry-standard DevOps practices.
 
-The final implementation includes a complete workflow from source code management to automated Docker image creation, cloud image storage, and production deployment.
+The project implements a complete DevOps workflow from source code management to automated Docker image creation, cloud image storage, continuous integration, and production deployment on AWS.

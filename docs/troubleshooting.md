@@ -1,12 +1,16 @@
 # 🛠️ Troubleshooting Guide
 
-This document contains common issues encountered while building and deploying the **ShopSphere Production-Ready DevOps Project** along with their causes and solutions.
+## 📖 Overview
+
+This guide documents the most common issues encountered while developing, containerizing, deploying, and maintaining the **ShopSphere Production-Ready DevOps Project**.
+
+It provides the symptoms, possible causes, and recommended solutions for each issue.
 
 ---
 
-# 1️⃣ PostgreSQL Connection Error
+# 1. PostgreSQL Connection Error
 
-## Problem
+## Error
 
 ```text
 Error: getaddrinfo ENOTFOUND postgres
@@ -14,25 +18,42 @@ Error: getaddrinfo ENOTFOUND postgres
 
 ## Cause
 
-The backend was running outside the Docker network while trying to connect to the PostgreSQL container using the hostname `postgres`.
+The backend could not resolve the PostgreSQL hostname.
+
+Possible reasons:
+
+- PostgreSQL container is not running
+- Incorrect `DB_HOST`
+- Backend running outside Docker
+- Docker network issue
 
 ## Solution
 
-- Verify the PostgreSQL container is running.
-- Check the Docker Compose service name.
-- Use the correct database host based on the execution environment.
-- Restart Docker Compose.
+Verify PostgreSQL container.
+
+```bash
+docker ps
+```
+
+Verify Docker Compose.
+
+```bash
+docker compose ps
+```
+
+Restart containers.
 
 ```bash
 docker compose down
-docker compose up --build
+
+docker compose up -d
 ```
 
 ---
 
-# 2️⃣ Database Initialization Failed
+# 2. Database Initialization Failed
 
-## Problem
+## Error
 
 ```bash
 npm run init-db
@@ -42,167 +63,264 @@ failed.
 
 ## Cause
 
-The PostgreSQL service was not ready or the database connection details were incorrect.
+- Database not created
+- PostgreSQL not ready
+- Invalid credentials
 
 ## Solution
 
-- Start PostgreSQL.
-- Verify database credentials.
-- Wait for PostgreSQL initialization.
-- Run the script again.
+Check PostgreSQL.
+
+```bash
+docker logs shopsphere-postgres
+```
+
+Verify environment variables.
+
+```env
+DB_HOST=postgres
+DB_PORT=5432
+DB_NAME=shopsphere
+DB_USER=postgres
+DB_PASSWORD=postgres
+```
+
+Run again.
+
+```bash
+npm run init-db
+```
 
 ---
 
-# 3️⃣ Docker Container Not Starting
+# 3. Products Table Not Found
 
-## Problem
+## Error
 
-Containers exited immediately after startup.
+```text
+relation "products" does not exist
+```
 
 ## Cause
 
-- Incorrect Dockerfile
-- Missing dependencies
-- Invalid environment variables
-- Application startup failure
+Database schema was not initialized.
 
 ## Solution
 
+Run schema scripts.
+
 ```bash
-docker compose logs
+docker exec -it shopsphere-postgres psql -U postgres
+```
+
+Verify
+
+```sql
+\dt
+```
+
+Expected
+
+```text
+products
+```
+
+---
+
+# 4. Docker Container Not Starting
+
+## Symptoms
+
+Container remains in
+
+```text
+Created
 ```
 
 or
 
-```bash
-docker logs <container-name>
-```
-
-Fix the reported issue and rebuild.
-
-```bash
-docker compose up --build
-```
-
----
-
-# 4️⃣ Port Already in Use
-
-## Problem
-
 ```text
-Bind for 0.0.0.0:5000 failed
+Exited
 ```
 
 ## Cause
 
-Another application is already using the required port.
+- Dockerfile issue
+- Missing dependencies
+- Invalid command
+- Missing environment variables
 
 ## Solution
+
+Check logs.
+
+```bash
+docker logs shopsphere-backend
+
+docker logs shopsphere-frontend
+```
+
+Inspect status.
+
+```bash
+docker ps -a
+```
+
+Restart.
+
+```bash
+docker compose up -d
+```
+
+---
+
+# 5. Nginx Returns 502 Bad Gateway
+
+## Error
+
+```text
+502 Bad Gateway
+```
+
+## Cause
+
+- Backend container stopped
+- Frontend container stopped
+- Incorrect upstream configuration
+- Docker networking issue
+
+## Solution
+
+Verify containers.
 
 ```bash
 docker ps
 ```
 
-Stop the conflicting container.
+Check Nginx logs.
 
 ```bash
-docker stop <container-id>
+docker logs shopsphere-nginx
+```
+
+Restart deployment.
+
+```bash
+docker compose restart
 ```
 
 ---
 
-# 5️⃣ Frontend Unable to Load Products
+# 6. Frontend Unable to Load Products
 
-## Problem
+## Symptoms
 
-No products displayed in the React application.
+No products displayed.
 
 ## Cause
 
-- Backend not running
-- Incorrect API URL
-- Database connection failed
+- Backend unavailable
+- Invalid API URL
+- Database unavailable
 
 ## Solution
 
-Verify:
+Verify backend.
 
-```
-http://localhost:5000/api/products
+```bash
+curl http://localhost:5000/api/products
 ```
 
-Check the browser Developer Tools (Network tab).
+Inspect browser Developer Tools.
+
+Check
+
+- Network tab
+- Console tab
 
 ---
 
-# 6️⃣ Health Check Failed
+# 7. Health Check Failed
 
-## Problem
+## Error
 
-```
+```text
 GET /health
 ```
 
-returned an error.
+returns an error.
 
 ## Cause
 
-Backend service not running.
+Backend service unavailable.
 
 ## Solution
 
-Restart the backend.
+Restart backend.
 
 ```bash
-npm run dev
+docker compose restart backend
 ```
 
-or
+Verify.
 
 ```bash
-docker compose up
-```
-
-Verify:
-
-```
-http://localhost:5000/health
+curl http://localhost:5000/health
 ```
 
 ---
 
-# 7️⃣ Docker Build Failed
-
-## Problem
-
-Docker image creation failed.
+# 8. Docker Build Failed
 
 ## Cause
 
 - Dockerfile error
-- Missing dependencies
+- Dependency issue
 - Invalid build context
 
 ## Solution
+
+Rebuild.
 
 ```bash
 docker compose build --no-cache
 ```
 
-Restart containers.
+Restart.
 
 ```bash
-docker compose up --build
+docker compose up -d
 ```
 
 ---
 
-# 8️⃣ Changes Not Reflected
+# 9. Port Already in Use
 
-## Problem
+## Error
 
-Application changes are not visible.
+```text
+Bind for 0.0.0.0:5000 failed
+```
+
+## Solution
+
+Identify process.
+
+```bash
+docker ps
+```
+
+or
+
+```bash
+sudo lsof -i :5000
+```
+
+Stop conflicting process.
+
+---
+
+# 10. Changes Not Reflected
 
 ## Cause
 
@@ -211,44 +329,41 @@ Application changes are not visible.
 
 ## Solution
 
-Hard refresh the browser.
+Hard refresh.
 
 ```
 Ctrl + Shift + R
 ```
 
-Rebuild Docker images.
+Rebuild.
 
 ```bash
-docker compose down
-docker compose up --build
+docker compose build --no-cache
 ```
 
 ---
 
-# 9️⃣ Git Push Failed
-
-## Problem
-
-Unable to push code to GitHub.
+# 11. Git Push Failed
 
 ## Cause
 
-- Authentication failure
+- Authentication
 - Wrong branch
-- Repository permission issue
+- Remote configuration
 
 ## Solution
 
-Verify:
+Verify.
 
 ```bash
 git status
+
 git branch
+
 git remote -v
 ```
 
-Push again.
+Push.
 
 ```bash
 git push origin main
@@ -256,65 +371,78 @@ git push origin main
 
 ---
 
-# 🔟 Jenkins Pipeline Failed
-
-## Problem
-
-The Jenkins build failed.
+# 12. Jenkins Build Failed
 
 ## Cause
 
-Possible reasons:
-
-- Docker daemon unavailable
+- Docker unavailable
+- AWS authentication
+- Jenkinsfile syntax
 - Git checkout failed
-- AWS CLI not installed
-- Incorrect Jenkinsfile
 
 ## Solution
 
-Check the Jenkins Console Output.
+Review Jenkins Console Output.
 
-Verify:
-
-- Docker is installed
-- Jenkins has Docker permissions
-- AWS CLI is configured
-- GitHub repository is accessible
-
-Restart Jenkins if required.
+Restart Jenkins.
 
 ```bash
 sudo systemctl restart jenkins
 ```
 
----
+Verify Docker.
 
-# 1️⃣1️⃣ Amazon ECR Login Failed
-
-## Problem
-
-```text
-no basic auth credentials
+```bash
+docker ps
 ```
 
-or
+---
+
+# 13. Jenkins Cannot Access Docker
+
+## Error
+
+```text
+permission denied while trying to connect to the Docker daemon socket
+```
+
+## Cause
+
+Jenkins user is not part of the Docker group.
+
+## Solution
+
+```bash
+sudo usermod -aG docker jenkins
+
+sudo systemctl restart jenkins
+```
+
+---
+
+# 14. Amazon ECR Login Failed
+
+## Error
 
 ```text
 AccessDeniedException
 ```
 
+or
+
+```text
+no basic auth credentials
+```
+
 ## Cause
 
-- EC2 IAM Role not attached
+- Missing IAM Role
 - Missing ECR permissions
-- AWS CLI configuration issue
+- Expired login
 
 ## Solution
 
-Verify the IAM Role.
-
-Check identity.
+Verify identity.
 
 ```bash
 aws sts get-caller-identity
@@ -323,29 +451,28 @@ aws sts get-caller-identity
 Login again.
 
 ```bash
-aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com
+aws ecr get-login-password --region ap-south-1 \
+| docker login \
+--username AWS \
+--password-stdin <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com
 ```
 
 ---
 
-# 1️⃣2️⃣ Docker Push to Amazon ECR Failed
-
-## Problem
-
-Docker images were not pushed to Amazon ECR.
+# 15. Docker Push Failed
 
 ## Cause
 
+- Incorrect repository
 - Authentication expired
-- Repository not found
-- Incorrect image tag
+- Invalid image tag
 
 ## Solution
 
-Login again.
+Verify images.
 
 ```bash
-aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com
+docker images
 ```
 
 Verify repositories.
@@ -354,15 +481,11 @@ Verify repositories.
 aws ecr describe-repositories
 ```
 
-Verify image tags.
-
-```bash
-docker images
-```
+Push again.
 
 ---
 
-# 🔍 Useful Debugging Commands
+# 🔍 Useful Commands
 
 ## Running Containers
 
@@ -372,18 +495,32 @@ docker ps
 
 ---
 
-## Docker Images
+## Container Logs
 
 ```bash
-docker images
+docker logs shopsphere-backend
+
+docker logs shopsphere-frontend
+
+docker logs shopsphere-postgres
+
+docker logs shopsphere-nginx
 ```
 
 ---
 
-## Docker Logs
+## Docker Compose Logs
 
 ```bash
 docker compose logs
+```
+
+---
+
+## Docker Images
+
+```bash
+docker images
 ```
 
 ---
@@ -412,7 +549,7 @@ aws sts get-caller-identity
 
 ---
 
-## Verify ECR Repositories
+## Verify ECR
 
 ```bash
 aws ecr describe-repositories
@@ -420,37 +557,38 @@ aws ecr describe-repositories
 
 ---
 
-## Backend Health Check
+## Health Check
 
-```
-http://localhost:5000/health
+```bash
+curl http://localhost:5000/health
 ```
 
 ---
 
 ## Products API
 
-```
-http://localhost:5000/api/products
+```bash
+curl http://localhost:5000/api/products
 ```
 
 ---
 
 # ✅ Best Practices
 
-- Use IAM Roles instead of AWS Access Keys.
-- Store configuration using environment variables.
-- Use Docker Compose for multi-container applications.
-- Push versioned Docker images to Amazon ECR.
-- Verify health endpoints after every deployment.
-- Review Jenkins Console Output before troubleshooting.
-- Check Docker logs before rebuilding containers.
-- Keep documentation updated with resolved issues.
+- Use IAM Roles instead of Access Keys.
+- Keep Docker images versioned.
+- Use Docker Compose for multi-container deployments.
+- Store configuration in environment variables.
+- Verify health checks after every deployment.
+- Monitor Jenkins Console Output.
+- Review Docker logs before rebuilding containers.
+- Test deployments before pushing to production.
+- Document every issue and its resolution.
 
 ---
 
 # 🎯 Outcome
 
-This troubleshooting guide documents the most common development, Docker, AWS, Jenkins, and Amazon ECR issues encountered while building the ShopSphere project.
+The ShopSphere project demonstrates a structured troubleshooting process covering application development, Docker, PostgreSQL, Jenkins, AWS EC2, Amazon ECR, and deployment automation.
 
-Maintaining a structured troubleshooting guide helps reduce debugging time, improves deployment reliability, and demonstrates a production-focused DevOps workflow.
+Maintaining this guide helps reduce recovery time, improve deployment reliability, and reflects the operational practices expected in modern DevOps environments.
